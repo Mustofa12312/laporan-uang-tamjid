@@ -161,7 +161,15 @@ const TransactionService = {
     const headers = data[0]
     let rows = data.slice(1).map(row => {
       const obj = {}
-      headers.forEach((h, i) => obj[columnKeyMap(h)] = row[i])
+      headers.forEach((h, i) => {
+        let val = row[i]
+        // Konversi objek Date dari Spreadsheet menjadi string
+        if (val instanceof Date) {
+          if (h === 'Tanggal') val = Utilities.formatDate(val, 'Asia/Jakarta', 'yyyy-MM-dd')
+          else val = Utilities.formatDate(val, 'Asia/Jakarta', 'yyyy-MM-dd HH:mm:ss')
+        }
+        obj[columnKeyMap(h)] = val
+      })
       return obj
     }).filter(r => r.status !== 'DELETED')
 

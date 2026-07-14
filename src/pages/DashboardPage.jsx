@@ -20,6 +20,7 @@ const CHART_COLORS = ['#2563EB', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#E
 export default function DashboardPage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
   const [selectedMonth, setSelectedMonth] = useState('2026-07')
 
   useEffect(() => {
@@ -28,10 +29,16 @@ export default function DashboardPage() {
 
   const loadDashboard = async () => {
     setLoading(true)
+    setErrorMsg(null)
     try {
       const res = await dashboardApi.get(selectedMonth)
-      if (res.success) setData(res.data)
+      if (res.success) {
+        setData(res.data)
+      } else {
+        setErrorMsg(res.message || 'Error tidak diketahui dari server')
+      }
     } catch (err) {
+      setErrorMsg(err.message)
       console.error(err)
     } finally {
       setLoading(false)
@@ -60,8 +67,23 @@ export default function DashboardPage() {
     )
   }
 
-  if (!data) return null
-
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
+        <div className="w-16 h-16 bg-danger-100 text-danger-500 rounded-full flex items-center justify-center">
+          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Gagal Memuat Data</h2>
+        <p className="text-gray-500 max-w-md">Pesan Error dari Server:</p>
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg border border-red-200 dark:border-red-800 font-mono text-sm max-w-lg break-words">
+          {errorMsg}
+        </div>
+        <button onClick={loadDashboard} className="btn-primary mt-4">Coba Lagi</button>
+      </div>
+    )
+  }
   const kpiCards = [
     { title: 'Total Pengeluaran', value: formatRupiah(data.totalBulanIni), icon: Wallet, color: 'from-primary-500 to-primary-600', change: pctChange },
     { title: 'Hari Ini', value: formatRupiah(data.totalHariIni), icon: Calendar, color: 'from-emerald-500 to-emerald-600' },
