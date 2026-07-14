@@ -30,13 +30,20 @@ const gasRequest = async (action, data = {}) => {
       return await response.json()
     } 
     
-    // Khusus untuk upload gambar (karena base64 terlalu panjang untuk GET URL)
+    // Khusus untuk upload gambar (base64 panjang)
+    // Menggunakan x-www-form-urlencoded karena GAS sering menghilangkan body JSON saat redirect 302
     else {
+      const formData = new URLSearchParams()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value) formData.append(key, value)
+      })
+
       const response = await fetch(url, {
         method: 'POST',
-        redirect: 'follow',
-        body: JSON.stringify(data) 
-        // Tanpa menyertakan custom headers agar tidak memicu preflight CORS
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
       })
       return await response.json()
     }

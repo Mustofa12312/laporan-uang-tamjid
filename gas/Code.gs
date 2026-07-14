@@ -14,7 +14,7 @@
 // ============ CONFIG ============
 const CONFIG = {
   SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE', // Ganti dengan ID Spreadsheet Anda
-  ROOT_FOLDER_ID: 'YOUR_DRIVE_FOLDER_ID_HERE', // Folder "Bukti Pengeluaran"
+  ROOT_FOLDER_ID: '1jRMHD67VbkCFFlUbApqYQzupRHiXRcV4', // Folder "Bukti Transaksi TAMJID"
   SALT: 'tamjid-salt-2026',
 }
 
