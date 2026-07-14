@@ -1,24 +1,46 @@
-import axios from 'axios'
 import * as mockApi from './mock/mockApi'
 
 // Jika URL GAS tersedia di .env, kita gunakan API Asli, jika tidak, gunakan Mock
 const GAS_API_URL = import.meta.env.VITE_GAS_API_URL || ''
 const USE_REAL_API = Boolean(GAS_API_URL)
 
-// Konfigurasi instance axios untuk komunikasi dengan GAS
-const apiClient = axios.create({
-  baseURL: GAS_API_URL,
-  headers: {
-    'Content-Type': 'text/plain;charset=utf-8',
-  },
-})
-
-// Fungsi helper untuk POST ke Google Apps Script (karena keterbatasan CORS di GAS)
-const gasPost = async (action, data = {}) => {
+// Fungsi helper untuk request ke Google Apps Script
+// Menggunakan metode GET untuk menghindari blokir CORS yang agresif pada metode POST di Google Apps Script.
+const gasRequest = async (action, data = {}) => {
   try {
-    // GAS menerima POST request dengan parameter action di URL
-    const response = await apiClient.post(`?action=${action}`, data)
-    return response.data
+    let url = `${GAS_API_URL}?action=${action}`
+    
+    // Untuk aksi selain upload, ubah semua data menjadi parameter URL (GET request)
+    // Ini adalah solusi paling ampuh untuk menembus CORS Google Apps Script
+    if (action !== 'upload') {
+      const queryParams = new URLSearchParams()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, typeof value === 'object' ? JSON.stringify(value) : value)
+        }
+      })
+      
+      const queryString = queryParams.toString()
+      if (queryString) url += `&${queryString}`
+
+      const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow'
+      })
+      return await response.json()
+    } 
+    
+    // Khusus untuk upload gambar (karena base64 terlalu panjang untuk GET URL)
+    else {
+      const response = await fetch(url, {
+        method: 'POST',
+        redirect: 'follow',
+        body: JSON.stringify(data) 
+        // Tanpa menyertakan custom headers agar tidak memicu preflight CORS
+      })
+      return await response.json()
+    }
+
   } catch (error) {
     console.error(`Error API (${action}):`, error)
     return { success: false, message: 'Gagal terhubung ke server (GAS)', data: null }
@@ -30,7 +52,7 @@ const gasPost = async (action, data = {}) => {
 // ============================================
 export const authApi = {
   login: USE_REAL_API
-    ? (username, password) => gasPost('login', { username, password })
+    ? (username, password) => gasRequest('login', { username, password })
     : mockApi.mockLogin,
     
   logout: USE_REAL_API
@@ -43,7 +65,7 @@ export const authApi = {
 // ============================================
 export const dashboardApi = {
   get: USE_REAL_API
-    ? (month) => gasPost('dashboard', { month })
+    ? (month) => gasRequest('dashboard', { month })
     : mockApi.mockGetDashboard,
 }
 
@@ -52,23 +74,23 @@ export const dashboardApi = {
 // ============================================
 export const transactionApi = {
   list: USE_REAL_API
-    ? (params) => gasPost('getTransactions', params)
+    ? (params) => gasRequest('getTransactions', params)
     : mockApi.mockGetTransactions,
     
   get: USE_REAL_API
-    ? (id) => gasPost('getTransaction', { id })
+    ? (id) => gasRequest('getTransaction', { id })
     : mockApi.mockGetTransaction,
     
   create: USE_REAL_API
-    ? (data) => gasPost('createTransaction', data)
+    ? (data) => gasRequest('createTransaction', data)
     : mockApi.mockCreateTransaction,
     
   update: USE_REAL_API
-    ? (id, data) => gasPost('updateTransaction', { id, ...data })
+    ? (id, data) => gasRequest('updateTransaction', { id, ...data })
     : mockApi.mockUpdateTransaction,
     
   delete: USE_REAL_API
-    ? (id, username) => gasPost('deleteTransaction', { id, username })
+    ? (id, username) => gasRequest('deleteTransaction', { id, username })
     : mockApi.mockDeleteTransaction,
 }
 
@@ -77,7 +99,7 @@ export const transactionApi = {
 // ============================================
 export const categoryApi = {
   list: USE_REAL_API
-    ? () => gasPost('getCategories')
+    ? () => gasRequest('getCategories')
     : mockApi.mockGetCategories,
 }
 
@@ -86,7 +108,7 @@ export const categoryApi = {
 // ============================================
 export const auditApi = {
   list: USE_REAL_API
-    ? (params) => gasPost('getAuditLog', params)
+    ? (params) => gasRequest('getAuditLog', params)
     : mockApi.mockGetAuditLog,
 }
 
@@ -95,6 +117,6 @@ export const auditApi = {
 // ============================================
 export const settingApi = {
   get: USE_REAL_API
-    ? () => gasPost('getSettings')
+    ? () => gasRequest('getSettings')
     : mockApi.mockGetSettings,
 }

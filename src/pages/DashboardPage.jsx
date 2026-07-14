@@ -222,10 +222,10 @@ export default function DashboardPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transaksi Terbaru</h3>
-            <Badge variant="neutral">{data.recentTransactions.length}</Badge>
+            <Badge variant="neutral">{(data.recentTransactions || []).length}</Badge>
           </div>
           <div className="space-y-3">
-            {data.recentTransactions.slice(0, 8).map(trx => (
+            {(data.recentTransactions || []).slice(0, 8).map(trx => (
               <div key={trx.id} className="flex items-center gap-3 p-2.5 rounded-btn hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
                   <ShoppingCart size={18} />
@@ -247,7 +247,7 @@ export default function DashboardPage() {
             <Clock size={18} className="text-gray-400" />
           </div>
           <div className="space-y-3">
-            {data.recentActivities.slice(0, 8).map(act => (
+            {(data.recentActivities || []).slice(0, 8).map(act => (
               <div key={act.id} className="flex items-start gap-3 p-2.5">
                 <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
                   act.aksi === 'CREATE' ? 'bg-success-500' :
