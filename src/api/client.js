@@ -120,3 +120,12 @@ export const settingApi = {
     ? () => gasRequest('getSettings')
     : mockApi.mockGetSettings,
 }
+
+// ============================================
+// ANALYTICS API
+// ============================================
+export const analyticsApi = {
+  getYearly: USE_REAL_API
+    ? (year) => gasRequest('analytics', { year })
+    : mockApi.mockGetAnalytics,
+}

@@ -67,6 +67,9 @@ function handleRequest(e) {
       // Audit
       case 'getAuditLog': result = AuditService.list(data); break
 
+      // Analytics
+      case 'analytics': result = AnalyticsService.getYearly(data.year || new Date().getFullYear().toString()); break
+
       // Health
       case 'health': result = { status: 'OK', timestamp: new Date().toISOString() }; break
 
@@ -355,6 +358,66 @@ const CategoryService = {
     }
     throw new Error('Kategori tidak ditemukan')
   }
+}
+
+// ============ ANALYTICS SERVICE ============
+const AnalyticsService = {
+  getYearly(year) {
+    const ss = getSpreadsheet()
+    const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+    let totalTahunan = 0
+    const trendBulanan = []
+    const categoryMap = {}
+    
+    for (const m of months) {
+      const sheetName = `${year}-${m}`
+      const sheet = ss.getSheetByName(sheetName)
+      let totalBulanIni = 0
+      
+      if (sheet) {
+        const data = sheet.getDataRange().getValues()
+        if (data.length > 1) {
+          const headers = data[0]
+          const catIdx = headers.indexOf('Kategori')
+          const totalIdx = headers.indexOf('Total')
+          const statIdx = headers.indexOf('Status')
+          
+          for (let i = 1; i < data.length; i++) {
+            if (data[i][statIdx] !== 'DELETED') {
+              const val = Number(data[i][totalIdx]) || 0
+              totalBulanIni += val
+              const cat = data[i][catIdx] || 'Lainnya'
+              categoryMap[cat] = (categoryMap[cat] || 0) + val
+            }
+          }
+        }
+      }
+      
+      totalTahunan += totalBulanIni
+      trendBulanan.push({
+        month: getMonthNameStr(m),
+        total: totalBulanIni
+      })
+    }
+    
+    const categoryBreakdown = Object.entries(categoryMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a,b) => b.value - a.value)
+    
+    return {
+      year,
+      totalTahunan,
+      rataRataBulanan: Math.round(totalTahunan / 12),
+      kategoriTerbesar: categoryBreakdown[0] || { name: '-', value: 0 },
+      trendBulanan,
+      categoryBreakdown
+    }
+  }
+}
+
+function getMonthNameStr(m) {
+  const names = { '01':'Jan', '02':'Feb', '03':'Mar', '04':'Apr', '05':'Mei', '06':'Jun', '07':'Jul', '08':'Ags', '09':'Sep', '10':'Okt', '11':'Nov', '12':'Des' }
+  return names[m] || m
 }
 
 // ============ USER SERVICE ============

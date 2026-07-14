@@ -197,7 +197,42 @@ export async function mockGetAuditLog({ page = 1, pageSize = 20 } = {}) {
 }
 
 // ======== SETTINGS ========
-export async function mockGetSettings() {
-  await delay(200)
-  return response(MOCK_SETTINGS)
+export const mockGetSettings = async () => {
+  await delay()
+  return { success: true, data: { organizationName: 'Masjid Jami Tamjid' } }
+}
+
+export const mockGetAnalytics = async (data) => {
+  await delay()
+  const year = data.year || '2026'
+  return {
+    success: true,
+    data: {
+      year,
+      totalTahunan: 45000000,
+      rataRataBulanan: 3750000,
+      kategoriTerbesar: { name: 'Operasional', value: 15000000 },
+      trendBulanan: [
+        { month: 'Jan', total: 4500000 },
+        { month: 'Feb', total: 5200000 },
+        { month: 'Mar', total: 3800000 },
+        { month: 'Apr', total: 6100000 },
+        { month: 'Mei', total: 4900000 },
+        { month: 'Jun', total: 5500000 },
+        { month: 'Jul', total: 4200000 },
+        { month: 'Ags', total: 3500000 },
+        { month: 'Sep', total: 4100000 },
+        { month: 'Okt', total: 0 },
+        { month: 'Nov', total: 0 },
+        { month: 'Des', total: 0 }
+      ],
+      categoryBreakdown: [
+        { name: 'Operasional', value: 15000000 },
+        { name: 'Pembangunan', value: 12000000 },
+        { name: 'Sosial', value: 8000000 },
+        { name: 'Konsumsi', value: 6000000 },
+        { name: 'Lain-lain', value: 4000000 }
+      ]
+    }
+  }
 }
