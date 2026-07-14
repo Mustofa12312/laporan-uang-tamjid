@@ -1,0 +1,122 @@
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  /* Hide non-print elements */
+  nav, .sidebar, .bottom-nav, .header-actions,
+  .no-print, button:not(.print-keep),
+  .toast-container, .modal-overlay {
+    display: none !important;
+  }
+
+  /* Print layout */
+  .print-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Print header */
+  .print-header {
+    text-align: center;
+    margin-bottom: 24pt;
+    border-bottom: 2pt solid #000;
+    padding-bottom: 12pt;
+  }
+
+  .print-header h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 4pt;
+  }
+
+  .print-header h2 {
+    font-size: 14pt;
+    font-weight: 600;
+    margin-bottom: 2pt;
+  }
+
+  .print-header p {
+    font-size: 10pt;
+    color: #333;
+  }
+
+  /* Print table */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    page-break-inside: auto;
+  }
+
+  .print-table th {
+    background-color: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border: 1px solid #333;
+    padding: 6pt 8pt;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .print-table td {
+    border: 1px solid #333;
+    padding: 4pt 8pt;
+    vertical-align: top;
+  }
+
+  .print-table tr {
+    page-break-inside: avoid;
+  }
+
+  .print-table .text-right {
+    text-align: right;
+  }
+
+  /* Print footer */
+  .print-footer {
+    margin-top: 32pt;
+    page-break-inside: avoid;
+  }
+
+  .print-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 48pt;
+  }
+
+  .print-signature-block {
+    text-align: center;
+    width: 30%;
+  }
+
+  .print-signature-block .line {
+    border-bottom: 1px solid #000;
+    margin-top: 60pt;
+    margin-bottom: 4pt;
+  }
+
+  .print-signature-block p {
+    font-size: 10pt;
+  }
+
+  /* Page settings */
+  @page {
+    size: A4;
+    margin: 20mm 15mm;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Print page number */
+  .print-page-number::after {
+    content: counter(page);
+  }
+}
